@@ -156,8 +156,14 @@ public class CustomAH extends Gui {
     private static final int DUNGEON_FILTER_4 = 5;
     private static final int DUNGEON_FILTER_5 = 6;
 
+    private static final int PET_LEVEL_0 = 0;
+    private static final int PET_LEVEL_80 = 1;
+    private static final int PET_LEVEL_90 = 2;
+    private static final int PET_LEVEL_100 = 3;
+
     private int dungeonFilter = DUNGEON_FILTER_ALL;
     private int sortMode = SORT_MODE_HIGH;
+    private int levelFilter = 0;
     private int rarityFilter = -1;
     private boolean filterMyAuctions = false;
     private int binFilter = BIN_FILTER_ALL;
@@ -177,7 +183,8 @@ public class CustomAH extends Gui {
             EnumChatFormatting.GREEN+"Enchant Filter");
     private static ItemStack CONTROL_STATS = Utils.createItemStack(Item.getItemFromBlock(Blocks.command_block),
             EnumChatFormatting.GREEN+"Stats for nerds");
-    private ItemStack[] controls = {DUNGEON_SORT,CONTROL_SORT,CONTROL_TIER,null,CONTROL_MYAUC,null,CONTROL_BIN,CONTROL_ENCH,CONTROL_STATS};
+    private static ItemStack CONTROL_LEVEL = Utils.createItemStack(Items.paper, EnumChatFormatting.GREEN + "Pet Level");
+    private ItemStack[] controls = {DUNGEON_SORT,CONTROL_SORT,CONTROL_TIER,CONTROL_LEVEL,CONTROL_MYAUC,null,CONTROL_BIN,CONTROL_ENCH,CONTROL_STATS};
 
     private NEUManager manager;
 
@@ -953,7 +960,10 @@ public class CustomAH extends Gui {
                 lore.add(EnumChatFormatting.AQUA + "Right-Click to go backwards!");
                 lore.add(EnumChatFormatting.YELLOW + "Click to switch filter!");
                 return lore;
-            case 3: break;
+            case 3:
+                lore.add("");
+                lore.add(selPrefix + "Minimum Pet Level: " + EnumChatFormatting.YELLOW + levelFilter);
+                break;
             case 4:
                 lore.add("");
                 String off = EnumChatFormatting.RED + "OFF";
@@ -1106,6 +1116,10 @@ public class CustomAH extends Gui {
             match &= auc.bin;
         } else if(binFilter == BIN_FILTER_AUC) {
             match &= !auc.bin;
+        }
+
+        if(levelFilter > PET_LEVEL_0) {
+            match &= auc.petLevel >= levelFilter;
         }
 
         if(enchFilter > ENCH_FILTER_ALL) {
@@ -1482,7 +1496,15 @@ public class CustomAH extends Gui {
                             if(rarityFilter >= rarities.length) rarityFilter = -1;
                         }
                         break;
-                    case 3: break;
+                    case 3:
+                        if(rightClicked) {
+                            levelFilter--;
+                            if(levelFilter < PET_LEVEL_0) levelFilter = PET_LEVEL_100;
+                        } else {
+                            levelFilter++;
+                            if(levelFilter > PET_LEVEL_100) levelFilter = PET_LEVEL_0;
+                        }
+                        break;
                     case 4:
                         filterMyAuctions = !filterMyAuctions;
                         break;
