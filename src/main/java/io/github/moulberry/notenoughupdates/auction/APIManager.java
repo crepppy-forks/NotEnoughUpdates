@@ -28,9 +28,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class APIManager {
 
+    private static Pattern PET_LEVEL_PATTERN = Pattern.compile("\\[Lvl (\\d+)]");
     private NEUManager manager;
     public final CustomAH customAH;
 
@@ -98,12 +101,13 @@ public class APIManager {
         public int dungeonTier;
         public String item_tag_str;
         public NBTTagCompound item_tag = null;
+        public int petLevel;
         private ItemStack stack;
 
         public int enchLevel = 0; //0 = clean, 1 = ench, 2 = ench/hpb
 
         public Auction(String auctioneerUuid, long end, int starting_bid, int highest_bid_amount, int bid_count,
-                       boolean bin, String category, String rarity, int dungeonTier, String item_tag_str) {
+                       boolean bin, String category, String rarity, int dungeonTier, String item_tag_str, int petLevel) {
             this.auctioneerUuid = auctioneerUuid;
             this.end = end;
             this.starting_bid = starting_bid;
@@ -114,6 +118,7 @@ public class APIManager {
             this.dungeonTier = dungeonTier;
             this.rarity = rarity;
             this.item_tag_str = item_tag_str;
+            this.petLevel = petLevel;
         }
 
         public ItemStack getStack() {
@@ -486,6 +491,12 @@ public class APIManager {
         String rarity = auction.get("tier").getAsString();
         JsonArray bids = auction.get("bids").getAsJsonArray();
 
+        int level = 100;
+        Matcher matcher = PET_LEVEL_PATTERN.matcher(item_name);
+        if(matcher.find()) {
+            level = Integer.parseInt(matcher.group(1));
+        }
+
         try {
             NBTTagCompound item_tag;
             try {
@@ -570,7 +581,7 @@ public class APIManager {
                     item_lore.split("\n")[0].endsWith("Mount")) category = "pet";
 
             Auction auction1 = new Auction(auctioneerUuid, end, starting_bid, highest_bid_amount,
-                    bid_count, bin, category, rarity, dungeonTier, item_bytes);
+                    bid_count, bin, category, rarity, dungeonTier, item_bytes, level);
 
             if(tag.hasKey("ench")) {
                 auction1.enchLevel = 1;
