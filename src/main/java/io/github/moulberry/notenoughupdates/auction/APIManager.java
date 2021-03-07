@@ -491,7 +491,7 @@ public class APIManager {
         String rarity = auction.get("tier").getAsString();
         JsonArray bids = auction.get("bids").getAsJsonArray();
 
-        int level = 100;
+        int level = 0;
         Matcher matcher = PET_LEVEL_PATTERN.matcher(item_name);
         if(matcher.find()) {
             level = Integer.parseInt(matcher.group(1));
